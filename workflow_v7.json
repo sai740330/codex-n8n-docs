@@ -1,0 +1,237 @@
+{
+  "name": "Music Video Creator v7",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-500, 200],
+      "id": "trigger"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1dN3VHNP5C_GP2-Cktymcrt3jKf9EZz1Nkv19khrk6a4",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "todo"
+            }
+          ]
+        },
+        "options": {
+          "returnAll": false,
+          "limit": 12
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [-280, 200],
+      "id": "getTodos",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "a4u6qC2ph8F8xY3O",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [-60, 200],
+      "id": "splitRows"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.piapi.ai/api/v1/task",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "32adf6c9d509ddafa63de0feb3d6c90b96b695259210a724a0cffbeba71fe0d6"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"Qubico/diffrhythm\",\n  \"task_type\": \"txt2audio-full\",\n  \"input\": {\n    \"lyrics\": \"\",\n    \"style_prompt\": \"{{ $json.prompt }}\",\n    \"style_audio\": \"\"\n  }\n}\n"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [160, 200],
+      "id": "createTask"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.piapi.ai/api/v1/task/{{ $json.data.task_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "32adf6c9d509ddafa63de0feb3d6c90b96b695259210a724a0cffbeba71fe0d6"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [380, 200],
+      "id": "pollTask"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.output.audio_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [600, 200],
+      "id": "downloadMp3"
+    },
+    {
+      "parameters": {
+        "action": "append",
+        "propertyName": "audioList",
+        "valueToAppend": "={{ $binary.data.fileName }}"
+      },
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 1,
+      "position": [820, 200],
+      "id": "collectMp3s"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $item(0).$json.audioList }}"
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [1040, 200],
+      "id": "mergeMp3",
+      "name": "Merge MP3 via ffmpeg"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "={{ $item(0).json.prompt }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [600, 0],
+      "id": "generateImage",
+      "credentials": {
+        "openAiApi": {
+          "id": "B18Y1uuHyHSI0Qb9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/render",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_file\": \"{{ $binary.image.fileName }}\",\n  \"audio_file\": \"{{ $binary.data.fileName }}\",\n  \"outputName\": \"hour_mix.mp4\"\n}\n"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1260, 200],
+      "id": "renderVideo"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.path }}"
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [1460, 200],
+      "id": "readVideo"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "binaryProperty": "data",
+        "title": "One Hour Mix",
+        "categoryId": "10",
+        "options": {
+          "privacyStatus": "unlisted"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [1660, 200],
+      "id": "uploadYoutube",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "x6epSus6qdy49LOy",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1dN3VHNP5C_GP2-Cktymcrt3jKf9EZz1Nkv19khrk6a4",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "index": "={{ $json.index }}",
+            "status": "uploaded"
+          },
+          "matchingColumns": ["index"]
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [1860, 200],
+      "id": "markUploaded",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "a4u6qC2ph8F8xY3O",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "trigger": {"main":[[{"node":"Google Sheets","type":"main","index":0}]]},
+    "Google Sheets": {"main":[[{"node":"splitRows","type":"main","index":0}]]},
+    "splitRows": {"main":[[{"node":"createTask","type":"main","index":0}],[{"node":"generateImage","type":"main","index":0}]]},
+    "createTask": {"main":[[{"node":"pollTask","type":"main","index":0}]]},
+    "pollTask": {"main":[[{"node":"downloadMp3","type":"main","index":0}]]},
+    "downloadMp3": {"main":[[{"node":"collectMp3s","type":"main","index":0}]]},
+    "collectMp3s": {"main":[[{"node":"splitRows","type":"main","index":1}]]},
+    "generateImage": {"main":[[{"node":"mergeMp3","type":"main","index":0}]]},
+    "mergeMp3": {"main":[[{"node":"renderVideo","type":"main","index":0}]]},
+    "renderVideo": {"main":[[{"node":"readVideo","type":"main","index":0}]]},
+    "readVideo": {"main":[[{"node":"uploadYoutube","type":"main","index":0}]]},
+    "uploadYoutube": {"main":[[{"node":"markUploaded","type":"main","index":0}]]}
+  }
+}
