@@ -472,7 +472,7 @@
         "url": "http://host.docker.internal:8000/render",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"audio_files\": {{ $json.audio_files }},\n  \"outputName\": \"{{ $json.title }}_merged.mp3\"\n}\n",
+        "jsonBody": "={{ JSON.stringify({ audio_files: $json.audio_files, outputName: $json.title + '_merged.mp3' }) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
