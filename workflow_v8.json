@@ -469,7 +469,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://host.docker.internal:8000/merge",
+        "url": "http://host.docker.internal:8000/merge-audio",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ audio_files: $json.audio_files, outputName: $json.title + '_merged.mp3' }) }}",
