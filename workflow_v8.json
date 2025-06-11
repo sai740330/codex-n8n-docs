@@ -10,7 +10,7 @@
         200
       ],
       "id": "c5b520a7-ae40-4a55-b1b3-bfd1d6715591",
-      "name": "When clicking \u2018Execute workflow\u2019"
+      "name": "When clicking ‘Execute workflow’"
     },
     {
       "parameters": {
@@ -25,7 +25,7 @@
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
-          "cachedResultName": "\u5de5\u4f5c\u88681",
+          "cachedResultName": "工作表1",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dN3VHNP5C_GP2-Cktymcrt3jKf9EZz1Nkv19khrk6a4/edit#gid=0"
         },
         "filtersUI": {
@@ -110,7 +110,7 @@
       "id": "9f036418-2c1b-49a8-999c-2c5aab4cf35e",
       "name": "HTTP Request1",
       "parameters": {
-        "jsCode": "const taskId = $json.data.task_id;\nconst apiKey = '32adf6c9d509ddafa63de0feb3d6c90b96b695259210a724a0cffbeba71fe0d6';\nfor (let i = 0; i < 20; i++) {\n  const res = await this.helpers.httpRequest({ method: 'GET', url: `https://api.piapi.ai/api/v1/task/${taskId}`, headers: { 'X-API-Key': apiKey }, json: true });\n  if (res.status === 'completed') return [{ json: res }];\n  await new Promise(r => setTimeout(r, 5000));\n}\nreturn [{ json: { status: 'failed', data: { output: { audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' } } } }];"
+        "jsCode": "const taskId = $json.data.task_id;\nconst apiKey = '32adf6c9d509ddafa63de0feb3d6c90b96b695259210a724a0cffbeba71fe0d6';\nlet res;\nfor (let i = 0; i < 20; i++) {\n  res = await this.helpers.httpRequest({ method: 'GET', url: `https://api.piapi.ai/api/v1/task/${taskId}`, headers: { 'X-API-Key': apiKey }, json: true });\n  if (res.status === 'completed') break;\n  await new Promise(r => setTimeout(r, 5000));\n}\nif (res.status !== 'completed') {\n  res = { status: 'failed', data: { output: { audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' } } };\n}\nreturn [{ json: res, pairedItem: { item: 0 } }];"
       }
     },
     {
@@ -204,7 +204,7 @@
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
-          "cachedResultName": "\u5de5\u4f5c\u88681",
+          "cachedResultName": "工作表1",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dN3VHNP5C_GP2-Cktymcrt3jKf9EZz1Nkv19khrk6a4/edit#gid=0"
         },
         "columns": {
@@ -587,7 +587,7 @@
   ],
   "pinData": {},
   "connections": {
-    "When clicking \u2018Execute workflow\u2019": {
+    "When clicking ‘Execute workflow’": {
       "main": [
         [
           {
