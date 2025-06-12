@@ -469,7 +469,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://host.docker.internal:8000/merge",
+        "url": "http://host.docker.internal:8000/merge-audio",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ audio_files: $json.audio_files, outputName: $json.title + '_merged.mp3' }) }}",
@@ -487,7 +487,7 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "={\n  \"merged_audio_file\": \"{{ $json.audio_file || $json.merged_audio_file || $json.output_file }}\"\n}\n",
+        "jsonOutput": "={\n  \"merged_audio_file\": \"{{ $json.merged_audio_file || $json.output_file || $json.audio_file }}\"\n}\n",
         "options": {}
       },
       "type": "n8n-nodes-base.set",

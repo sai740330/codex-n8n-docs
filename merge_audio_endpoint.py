@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, HttpUrl
 from typing import List
 import requests
@@ -7,13 +8,14 @@ import uuid
 import subprocess
 
 app = FastAPI()
+app.mount("/merged-files", StaticFiles(directory="merged"), name="merged-files")
 
 class MergeAudioRequest(BaseModel):
     audio_files: List[HttpUrl]
     outputName: str
 
 @app.post("/merge-audio")
-def merge_audio(body: MergeAudioRequest):
+def merge_audio(body: MergeAudioRequest, request: Request):
     temp_dir = f"/tmp/{uuid.uuid4().hex}"
     os.makedirs(temp_dir, exist_ok=True)
     downloaded_files = []
@@ -59,7 +61,8 @@ def merge_audio(body: MergeAudioRequest):
         except subprocess.CalledProcessError as e:
             raise HTTPException(status_code=500, detail=f"ffmpeg failed: {e.stderr.decode()}")
 
-        return {"status": "success", "merged_audio_file": output_path}
+        file_url = str(request.base_url) + f"merged-files/{body.outputName}"
+        return {"status": "success", "merged_audio_file": file_url}
     finally:
         # Cleanup downloaded files
         for path in downloaded_files:
