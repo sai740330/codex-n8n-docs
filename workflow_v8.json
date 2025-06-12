@@ -363,8 +363,18 @@
     },
     {
       "parameters": {
-        "mode": "raw",
-        "jsonOutput": "={\n  \"cover_file\": \"{{ $('Google Drive1').item.json.webContentLink }}\",\n  \"title\": \"{{ $('Google Sheets').item.json.title }}\"\n}\n",
+        "values": {
+          "string": [
+            {
+              "name": "cover_file",
+              "value": "={{ $('Google Drive1').item.json.webContentLink.trim() }}"
+            },
+            {
+              "name": "title",
+              "value": "={{ $('Google Sheets').item.json.title.trim() }}"
+            }
+          ]
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -440,8 +450,18 @@
     },
     {
       "parameters": {
-        "mode": "raw",
-        "jsonOutput": "={\n  \"audio_file\": \"{{ $('Google Drive').item.json.webContentLink }}\",\n  \"title\": \"{{ $('Google Sheets').item.json.title }}\"\n}\n",
+        "values": {
+          "string": [
+            {
+              "name": "audio_file",
+              "value": "={{ $('Google Drive').item.json.webContentLink.trim() }}"
+            },
+            {
+              "name": "title",
+              "value": "={{ $('Google Sheets').item.json.title.trim() }}"
+            }
+          ]
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -486,8 +506,14 @@
     },
     {
       "parameters": {
-        "mode": "raw",
-        "jsonOutput": "={\n  \"merged_audio_file\": \"{{ $json.merged_audio_file || $json.output_file || $json.audio_file }}\"\n}\n",
+        "values": {
+          "string": [
+            {
+              "name": "merged_audio_file",
+              "value": "={{ ($json.merged_audio_file || $json.output_file || $json.audio_file).trim() }}"
+            }
+          ]
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.set",
