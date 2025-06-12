@@ -349,7 +349,7 @@
         "url": "http://host.docker.internal:8000/render",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"image_file\": \"{{ $json.cover_file }}\",\n  \"audio_file\": \"{{ $json.merged_audio_file }}\",\n  \"outputName\": \"{{ $json.title }}.mp4\"\n}\n",
+        "jsonBody": "={{ { \"image_file\": $json.cover_file, \"audio_file\": $json.merged_audio_file, \"outputName\": $json.title + '.mp4' } }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
